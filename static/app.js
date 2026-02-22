@@ -18,7 +18,7 @@ const auth = firebase.auth();
 // ── Backend API URL ──────────────────────────────────────────────
 // In production (GitHub Pages), replace with your Render backend URL.
 // In local dev (localhost), it falls back to http://localhost:8000
-const RENDER_BACKEND_URL = "https://YOUR-APP-NAME.onrender.com"; // ← update after deploying to Render
+const RENDER_BACKEND_URL = "https://ai-powered-sql-analysis-system.onrender.com";
 const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
   ? "http://localhost:8000"
   : RENDER_BACKEND_URL;
