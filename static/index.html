@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SQL AI &amp; PDF Analysis Platform</title>
+  <meta name="description"
+    content="AI-powered SQL and PDF analysis. Ask questions in plain English and get instant, intelligent answers from your data." />
+  <link rel="icon" href="logo.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <!-- Plotly -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <!-- PapaParse -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <!-- SheetJS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+
+<body>
+
+  <canvas id="particles-canvas"></canvas>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <div class="loading-overlay" id="loading-overlay" style="display:none;">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loading-text">Processing…</div>
+  </div>
+
+  <div class="app-wrapper">
+
+    <!-- ═══════════════════ LANDING ═══════════════════ -->
+    <div class="page active" id="page-landing">
+
+      <!-- Nav Bar -->
+      <nav class="landing-nav">
+        <img src="logo.png" class="nav-logo" alt="SQL AI" />
+        <div class="nav-links">
+          <a class="nav-link"
+            onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Features</a>
+          <a class="nav-link" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">How
+            it works</a>
+        </div>
+        <div class="nav-actions">
+          <button class="btn btn-ghost btn-sm" onclick="showPage('login')">Sign In</button>
+          <button class="btn btn-primary btn-sm" onclick="showPage('signup')">Get Started</button>
+        </div>
+      </nav>
+
+      <!-- Hero -->
+      <section class="hero">
+        <div class="hero-kicker">Powered by Sarvam AI</div>
+        <h1>Turn your data &amp; documents<br />into instant answers</h1>
+        <p>Upload a spreadsheet or PDF. Ask questions in plain English. No SQL, no code — just intelligence.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary btn-xl" onclick="showPage('signup')">Start for free</button>
+          <button class="btn btn-outline btn-xl" onclick="showPage('login')">Sign in</button>
+        </div>
+        <div class="hero-badges">
+          <span class="hero-badge-item">CSV &amp; Excel</span>
+          <span class="hero-badge-sep">·</span>
+          <span class="hero-badge-item">PDF Documents</span>
+          <span class="hero-badge-sep">·</span>
+          <span class="hero-badge-item">SQL AI Agent</span>
+          <span class="hero-badge-sep">·</span>
+          <span class="hero-badge-item">Interactive Charts</span>
+        </div>
+      </section>
+
+      <!-- Capability Strip -->
+      <div class="cap-strip" id="features">
+        <div class="cap-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          <span>SQL AI Analysis</span>
+        </div>
+        <div class="cap-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+          <span>PDF Intelligence</span>
+        </div>
+        <div class="cap-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          <span>Data Cleaning</span>
+        </div>
+        <div class="cap-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>
+          <span>7 Chart Types</span>
+        </div>
+        <div class="cap-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0110 0v4" />
+          </svg>
+          <span>Secure Auth</span>
+        </div>
+      </div>
+
+      <div class="main-content">
+
+        <!-- Feature Cards -->
+        <div class="section-label">Platform features</div>
+        <div class="feat-grid">
+          <div class="feat-card">
+            <div class="feat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4l3 3" />
+              </svg>
+            </div>
+            <div class="feat-card-title">SQL AI Agent</div>
+            <div class="feat-card-desc">Type any question in plain English. The AI writes and executes SQL
+              automatically, then explains the result clearly.</div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+            </div>
+            <div class="feat-card-title">PDF Intelligence</div>
+            <div class="feat-card-desc">Upload any PDF and get accurate answers instantly. AI retrieves exact passages
+              using RAG and synthesizes insights.</div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+            </div>
+            <div class="feat-card-title">Smart Data Cleaning</div>
+            <div class="feat-card-desc">Handle missing values, remove duplicates, and standardize data with simple
+              one-click cleaning options.</div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+            </div>
+            <div class="feat-card-title">Interactive Charts</div>
+            <div class="feat-card-desc">Histogram, Scatter, Box, Bar, Line, Pie, and Correlation Heatmap — all
+              interactive and powered by Plotly.</div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0110 0v4" />
+              </svg>
+            </div>
+            <div class="feat-card-title">Secure by Default</div>
+            <div class="feat-card-desc">Firebase Authentication with session isolation. Your data is processed only
+              during your session and never stored permanently.</div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
+            </div>
+            <div class="feat-card-title">Fast &amp; Reliable</div>
+            <div class="feat-card-desc">Sarvam AI processes queries with retry logic and smart error handling for
+              consistent, fast responses every time.</div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- How it works -->
+        <div class="section-label" id="how-it-works">How it works</div>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-num">01</div>
+            <div class="step-title">Sign Up</div>
+            <div class="step-desc">Create a free account in seconds with your email address.</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">02</div>
+            <div class="step-title">Upload</div>
+            <div class="step-desc">Add a CSV, Excel spreadsheet, or any PDF document.</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">03</div>
+            <div class="step-title">Ask</div>
+            <div class="step-desc">Type your question in plain English — no SQL or coding needed.</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">04</div>
+            <div class="step-title">Get Answers</div>
+            <div class="step-desc">AI answers instantly with data, insights, and visual charts.</div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- FAQ -->
+        <div class="section-label">Frequently asked questions</div>
+        <div class="faq-list">
+          <div class="guide-section">
+            <div class="guide-header" onclick="toggleGuide(this)">Do I need SQL or programming knowledge? <span
+                class="guide-arrow">&#8964;</span></div>
+            <div class="guide-body">No. Just type your question in plain English — "What is the average salary by
+              department?" — and the AI writes the SQL, runs it, and explains the result.</div>
+          </div>
+          <div class="guide-section">
+            <div class="guide-header" onclick="toggleGuide(this)">What file types are supported? <span
+                class="guide-arrow">&#8964;</span></div>
+            <div class="guide-body">For data analysis: CSV, Excel (.xlsx / .xls), and tab-delimited TXT files. For
+              document analysis: any text-based PDF (reports, papers, manuals, books).</div>
+          </div>
+          <div class="guide-section">
+            <div class="guide-header" onclick="toggleGuide(this)">Is my data secure? <span
+                class="guide-arrow">&#8964;</span></div>
+            <div class="guide-body">Yes. Firebase Authentication protects your account. Data is processed in an isolated
+              server session and is not stored permanently after you log out.</div>
+          </div>
+          <div class="guide-section">
+            <div class="guide-header" onclick="toggleGuide(this)">How many questions can I ask? <span
+                class="guide-arrow">&#8964;</span></div>
+            <div class="guide-body">As many as you like. The full conversation history is preserved so the AI
+              understands context from earlier questions in the same session.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <footer class="landing-footer">
+        Built by <strong>Y. Balaji</strong> &middot; Powered by
+        Sarvam AI
+      </footer>
+    </div>
+
+    <!-- ═══════════════════ LOGIN ═══════════════════ -->
+    <div class="page" id="page-login">
+      <div class="auth-wrapper">
+        <div class="auth-card">
+          <img src="logo.png" class="auth-logo" alt="SQL AI" />
+          <div class="auth-title">Welcome back</div>
+          <div class="auth-subtitle">Sign in to your workspace</div>
+          <div class="auth-error" id="login-error"></div>
+          <form id="login-form" onsubmit="handleLogin(event)">
+            <div class="input-group">
+              <label>Email address</label>
+              <input class="input-field" type="email" id="login-email" placeholder="you@example.com" required
+                autocomplete="email" />
+            </div>
+            <div class="input-group">
+              <label>Password</label>
+              <input class="input-field" type="password" id="login-password" placeholder="Enter your password" required
+                autocomplete="current-password" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-full btn-lg" id="login-btn">Sign In</button>
+          </form>
+          <div class="auth-footer">
+            No account? <a onclick="showPage('signup')">Create one</a>
+            <br />
+            <a onclick="showPage('forgot')" style="color:var(--text-3);">Forgot password?</a>
+            <br />
+            <a onclick="showPage('landing')" style="color:var(--text-3);font-weight:400;">&larr; Back to home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ SIGNUP ═══════════════════ -->
+    <div class="page" id="page-signup">
+      <div class="auth-wrapper">
+        <div class="auth-card">
+          <img src="logo.png" class="auth-logo" alt="SQL AI" />
+          <div class="auth-title">Create account</div>
+          <div class="auth-subtitle">Free forever &mdash; no credit card required</div>
+          <div class="auth-error" id="signup-error"></div>
+          <form id="signup-form" onsubmit="handleSignup(event)">
+            <div class="input-group">
+              <label>Full name</label>
+              <input class="input-field" type="text" id="signup-name" placeholder="Your name" required
+                autocomplete="name" />
+            </div>
+            <div class="input-group">
+              <label>Email address</label>
+              <input class="input-field" type="email" id="signup-email" placeholder="you@example.com" required
+                autocomplete="email" />
+            </div>
+            <div class="input-group">
+              <label>Password <span style="color:var(--text-3);font-weight:400;">(min 6 characters)</span></label>
+              <input class="input-field" type="password" id="signup-password" placeholder="Create a strong password"
+                required minlength="6" autocomplete="new-password" oninput="checkPasswordStrength(this.value)" />
+              <div class="pwd-strength" id="pwd-strength-bar" style="display:none;">
+                <div class="pwd-strength-fill" id="pwd-strength-fill"></div>
+              </div>
+              <div class="pwd-strength-label" id="pwd-strength-label"></div>
+            </div>
+            <div class="input-group">
+              <label>Confirm password</label>
+              <input class="input-field" type="password" id="signup-confirm" placeholder="Repeat your password" required
+                minlength="6" autocomplete="new-password" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-full btn-lg" id="signup-btn">Create Account</button>
+          </form>
+          <div class="auth-footer">
+            Already have an account? <a onclick="showPage('login')">Sign in</a>
+            <br />
+            <a onclick="showPage('landing')" style="color:var(--text-3);font-weight:400;">&larr; Back to home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ FORGOT PASSWORD ═══════════════════ -->
+    <div class="page" id="page-forgot">
+      <div class="auth-wrapper">
+        <div class="auth-card">
+          <img src="logo.png" class="auth-logo" alt="SQL AI" />
+          <div class="auth-title">Reset password</div>
+          <div class="auth-subtitle">Enter your email and we'll send a reset link</div>
+          <div class="auth-error" id="forgot-error"></div>
+          <div class="auth-success" id="forgot-success"></div>
+          <form id="forgot-form" onsubmit="handleForgotPassword(event)">
+            <div class="input-group">
+              <label>Email address</label>
+              <input class="input-field" type="email" id="forgot-email" placeholder="you@example.com" required />
+            </div>
+            <button type="submit" class="btn btn-primary btn-full btn-lg" id="forgot-btn">Send Reset Link</button>
+          </form>
+          <div class="auth-footer">
+            <a onclick="showPage('login')">&larr; Back to sign in</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <img src="logo.png" class="sidebar-logo" alt="SQL AI" />
+        <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+        <div class="sidebar-username" id="sidebar-username">User</div>
+        <div class="sidebar-status">Active session</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Overview</div>
+        <button class="nav-btn active" data-page="dashboard" onclick="showPage('dashboard')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          Dashboard
+        </button>
+        <div class="nav-section-title">Data Tools</div>
+        <button class="nav-btn" data-page="data_clean" onclick="showPage('data_clean')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          Data Upload &amp; Clean
+        </button>
+        <button class="nav-btn" data-page="sql_ai" onclick="showPage('sql_ai')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4l3 3" />
+          </svg>
+          SQL AI Analysis
+        </button>
+        <div class="nav-section-title">Documents</div>
+        <button class="nav-btn" data-page="pdf_ai" onclick="showPage('pdf_ai')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          PDF AI Analysis
+        </button>
+        <div class="nav-section-title">Support</div>
+        <button class="nav-btn" data-page="help" onclick="showPage('help')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          Help &amp; Guide
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="logout-btn" onclick="handleLogout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- ═══════════════════ TOPBAR ═══════════════════ -->
+    <div class="topbar" id="topbar" style="display:none;">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+        <img src="logo.png" class="topbar-logo" alt="SQL AI" />
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-user">
+          <div class="topbar-user-dot"></div>
+          <span id="topbar-username">User</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ DASHBOARD ═══════════════════ -->
+    <div class="page" id="page-dashboard">
+      <div class="main-content">
+        <div class="page-header">
+          <div class="page-title">Dashboard</div>
+          <div class="page-subtitle" id="dash-welcome">Welcome back</div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card card card-teal">
+            <div class="stat-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+              </svg>
+            </div>
+            <div>
+              <div class="stat-label">SQL Dataset</div>
+              <div class="stat-value" id="dash-sql-status">Not loaded</div>
+            </div>
+          </div>
+          <div class="stat-card card card-purple">
+            <div class="stat-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+            </div>
+            <div>
+              <div class="stat-label">PDF Document</div>
+              <div class="stat-value" id="dash-pdf-status">Not loaded</div>
+            </div>
+          </div>
+          <div class="stat-card card card-teal">
+            <div class="stat-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+              </svg>
+            </div>
+            <div>
+              <div class="stat-label">Queries Answered</div>
+              <div class="stat-value" id="dash-query-count">0</div>
+            </div>
+          </div>
+          <div class="stat-card card card-amber">
+            <div class="stat-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </div>
+            <div>
+              <div class="stat-label">Session Started</div>
+              <div class="stat-value" id="dash-session-time">&mdash;</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="section-label">Quick actions</div>
+        <div class="quick-action-grid">
+          <button class="quick-action" onclick="showPage('data_clean')">
+            <div class="quick-action-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+            </div>
+            <div class="quick-action-label">Upload Dataset</div>
+            <div class="quick-action-desc">CSV, Excel, or TXT</div>
+          </button>
+          <button class="quick-action" onclick="showPage('sql_ai')">
+            <div class="quick-action-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+              </svg>
+            </div>
+            <div class="quick-action-label">SQL AI Chat</div>
+            <div class="quick-action-desc">Ask questions about your data</div>
+          </button>
+          <button class="quick-action" onclick="showPage('pdf_ai')">
+            <div class="quick-action-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+            </div>
+            <div class="quick-action-label">PDF Analysis</div>
+            <div class="quick-action-desc">Upload and query any PDF</div>
+          </button>
+          <button class="quick-action" onclick="showPage('help')">
+            <div class="quick-action-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+            <div class="quick-action-label">Help Guide</div>
+            <div class="quick-action-desc">Learn how to use the platform</div>
+          </button>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="section-label">Getting started</div>
+        <div class="faq-list">
+          <div class="guide-section">
+            <div class="guide-header" onclick="toggleGuide(this)">Step 1 &mdash; Upload &amp; clean your data <span
+                class="guide-arrow">&#8964;</span></div>
+            <div class="guide-body">Go to <b>Data Upload &amp; Clean</b>, drag and drop a CSV or Excel file. Preview
+              your data, check statistics, handle nulls and duplicates, then visualize with charts.</div>
+          </div>
+          <div class="guide-section">
+            <div class="guide-header" onclick="toggleGuide(this)">Step 2 &mdash; Ask SQL AI questions <span
+                class="guide-arrow">&#8964;</span></div>
+            <div class="guide-body">After uploading data, go to <b>SQL AI Analysis</b>. Type questions like "Show top 10
+              customers by revenue" — the AI writes the SQL, runs it, and explains the result.</div>
+          </div>
+          <div class="guide-section">
+            <div class="guide-header" onclick="toggleGuide(this)">Step 3 &mdash; Analyse PDFs with AI <span
+                class="guide-arrow">&#8964;</span></div>
+            <div class="guide-body">Go to <b>PDF AI Analysis</b>, upload any PDF. Click "Generate Summary" for an
+              overview, or ask specific questions like "What are the key conclusions?"</div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="section-label">Pro tips</div>
+        <div class="tips-grid">
+          <div class="tip-card tip-teal"><b>Natural language:</b> Ask exactly how you'd speak — "Which month had the
+            highest sales?" or "What is the average age?"</div>
+          <div class="tip-card tip-purple"><b>PDF accuracy:</b> Use text-based PDFs, not scanned images, for the best
+            extraction quality.</div>
+          <div class="tip-card tip-teal"><b>Clean first:</b> Remove nulls and duplicates before analysing to get more
+            accurate AI answers.</div>
+          <div class="tip-card tip-amber"><b>Use suggestions:</b> Quick question buttons on the SQL AI page are great
+            starting points to explore data.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ DATA UPLOAD & CLEAN ═══════════════════ -->
+    <div class="page" id="page-data_clean">
+      <div class="main-content">
+        <div class="page-header">
+          <div class="page-title">Data Upload &amp; Clean</div>
+          <div class="page-subtitle">Upload CSV or Excel, preview, clean, and visualize your data</div>
+        </div>
+
+        <div class="dropzone" id="data-dropzone" onclick="document.getElementById('data-file-input').click()">
+          <input type="file" id="data-file-input" accept=".csv,.xlsx,.xls,.txt"
+            onchange="handleDataUpload(this.files[0])" />
+          <div class="dropzone-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+          </div>
+          <div class="dropzone-title">Drop your file here or click to browse</div>
+          <div class="dropzone-sub">Supports CSV &middot; Excel (.xlsx / .xls) &middot; Tab-delimited TXT</div>
+        </div>
+
+        <div id="data-loaded-section" style="display:none;">
+          <div class="loaded-msg" id="data-loaded-msg"></div>
+          <div class="stat-pills" id="data-stat-pills"></div>
+
+          <div class="tabs mt-2">
+            <button class="tab-btn active" onclick="switchTab('data-tab','preview',this)">Preview</button>
+            <button class="tab-btn" onclick="switchTab('data-tab','stats',this)">Statistics</button>
+          </div>
+          <div class="tab-content active" id="data-tab-preview">
+            <div class="data-table-wrap" id="data-preview-table"></div>
+          </div>
+          <div class="tab-content" id="data-tab-stats">
+            <div class="data-table-wrap" id="data-stats-table"></div>
+          </div>
+
+          <div class="section-divider"></div>
+          <div class="section-label">Data cleaning options</div>
+          <div class="info-note">Select how to handle missing values and duplicate rows, then click Apply.</div>
+          <div class="glass">
+            <div class="grid-3">
+              <div class="input-group">
+                <label>Numeric nulls</label>
+                <select class="input-field" id="clean-numeric">
+                  <option>Keep as-is</option>
+                  <option>Drop rows</option>
+                  <option>Fill with Mean</option>
+                  <option>Fill with Median</option>
+                  <option>Fill with Zero</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label>Text / category nulls</label>
+                <select class="input-field" id="clean-categorical">
+                  <option>Keep as-is</option>
+                  <option>Drop rows</option>
+                  <option>Fill with Mode</option>
+                  <option>Fill with "Unknown"</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label>Duplicate rows</label>
+                <select class="input-field" id="clean-duplicates">
+                  <option>Keep all</option>
+                  <option>Remove duplicates</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full mt-1" onclick="applyDataCleaning()">Apply Cleaning</button>
+          </div>
+
+          <div class="section-divider"></div>
+          <div class="section-label">Data visualization</div>
+          <div class="info-note">Choose a chart type and columns, then click Generate Chart.</div>
+          <div class="glass">
+            <div class="grid-2">
+              <div class="input-group">
+                <label>Chart type</label>
+                <select class="input-field" id="viz-chart-type" onchange="updateVizOptions()">
+                  <option>Histogram</option>
+                  <option>Scatter Plot</option>
+                  <option>Box Plot</option>
+                  <option>Bar Chart</option>
+                  <option>Line Chart</option>
+                  <option>Pie Chart</option>
+                  <option>Correlation Heatmap</option>
+                </select>
+              </div>
+              <div id="viz-options-container"></div>
+            </div>
+            <button class="btn btn-primary btn-full mt-1" onclick="renderChart()">Generate Chart</button>
+            <div id="plotly-chart" class="mt-2"></div>
+          </div>
+
+          <div class="section-divider"></div>
+          <button class="btn btn-primary btn-full" onclick="showPage('sql_ai')">Continue to SQL AI Analysis
+            &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ SQL AI ANALYSIS ═══════════════════ -->
+    <div class="page" id="page-sql_ai">
+      <div class="main-content">
+        <div class="page-header">
+          <div class="page-title">SQL AI Analysis</div>
+          <div class="page-subtitle">Ask any question in plain English — AI writes SQL, runs it, and explains results
+          </div>
+        </div>
+
+        <div id="sql-no-data" class="empty-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+          </div>
+          <div class="empty-title">No dataset loaded</div>
+          <div class="empty-desc">Upload a CSV or Excel file first, then come back to ask AI questions.</div>
+          <button class="btn btn-primary" onclick="showPage('data_clean')">Go to Data Upload</button>
+        </div>
+
+        <div id="sql-loaded-section" style="display:none;">
+          <div class="schema-bar glass" id="sql-schema-bar"></div>
+
+          <div class="section-mini-label">Try these questions</div>
+          <div class="suggestion-grid" id="sql-suggestions"></div>
+
+          <div class="section-divider"></div>
+          <div class="section-mini-label">Conversation</div>
+          <div class="chat-container" id="sql-chat-container"></div>
+
+          <div class="chat-input-bar">
+            <input class="input-field" type="text" id="sql-chat-input"
+              placeholder="What is the average salary by department?"
+              onkeydown="if(event.key==='Enter')sendSQLQuery()" />
+            <button class="btn btn-primary" onclick="sendSQLQuery()">Send</button>
+          </div>
+          <button class="btn btn-ghost btn-full mt-2" onclick="clearSQLChat()">Clear conversation</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ PDF AI ANALYSIS ═══════════════════ -->
+    <div class="page" id="page-pdf_ai">
+      <div class="main-content">
+        <div class="page-header">
+          <div class="page-title">PDF AI Analysis</div>
+          <div class="page-subtitle">Upload any PDF document and ask questions or generate a full summary</div>
+        </div>
+
+        <div class="dropzone" id="pdf-dropzone" onclick="document.getElementById('pdf-file-input').click()">
+          <input type="file" id="pdf-file-input" accept=".pdf" onchange="handlePDFUpload(this.files[0])" />
+          <div class="dropzone-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+          </div>
+          <div class="dropzone-title" id="pdf-dropzone-title">Drop your PDF here or click to browse</div>
+          <div class="dropzone-sub" id="pdf-dropzone-sub">Research papers, reports, manuals, books</div>
+        </div>
+
+        <div id="pdf-loaded-section" style="display:none;">
+          <div class="loaded-msg" id="pdf-loaded-msg"></div>
+
+          <div class="grid-2 mt-2">
+            <button class="btn btn-primary" onclick="generatePDFSummary()">Generate Full Summary</button>
+            <button class="btn btn-outline" onclick="document.getElementById('pdf-file-input').click()">Upload Different
+              PDF</button>
+          </div>
+
+          <div class="section-divider"></div>
+          <div class="section-mini-label">Quick questions</div>
+          <div class="suggestion-grid">
+            <button class="suggestion-pill" onclick="sendPDFQuery('What is this document about?')">What is this
+              about?</button>
+            <button class="suggestion-pill" onclick="sendPDFQuery('What are the key findings or conclusions?')">Key
+              findings</button>
+            <button class="suggestion-pill" onclick="sendPDFQuery('List the main topics covered')">Main topics</button>
+            <button class="suggestion-pill"
+              onclick="sendPDFQuery('What recommendations are given?')">Recommendations</button>
+            <button class="suggestion-pill" onclick="sendPDFQuery('Summarize in 5 bullet points')">5-point
+              summary</button>
+          </div>
+          <div class="chat-container" id="pdf-chat-container"></div>
+          <div class="chat-input-bar">
+            <input class="input-field" type="text" id="pdf-chat-input" placeholder="Ask anything about your PDF…"
+              onkeydown="if(event.key==='Enter')sendPDFQueryFromInput()" />
+            <button class="btn btn-primary" onclick="sendPDFQueryFromInput()">Send</button>
+          </div>
+          <button class="btn btn-ghost btn-full mt-2" onclick="clearPDFChat()">Clear conversation</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ HELP ═══════════════════ -->
+    <div class="page" id="page-help">
+      <div class="main-content">
+        <div class="page-header">
+          <div class="page-title">Help &amp; Guide</div>
+          <div class="page-subtitle">Everything you need to get the most out of SQL AI &amp; PDF Analysis</div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card card-teal">
+            <div class="help-card-title">Supported file types</div>
+            <div class="help-card-body">
+              <b>Data:</b> CSV, Excel (.xlsx, .xls), Tab-delimited TXT<br />
+              <b>Documents:</b> PDF (text-based, not scanned images)
+            </div>
+          </div>
+          <div class="card card-purple">
+            <div class="help-card-title">Example SQL questions</div>
+            <div class="help-card-body">
+              &bull; "Show the top 10 rows"<br />
+              &bull; "What is the average salary?"<br />
+              &bull; "Count rows by category"<br />
+              &bull; "Find duplicate records"
+            </div>
+          </div>
+          <div class="card card-teal">
+            <div class="help-card-title">Data cleaning options</div>
+            <div class="help-card-body">
+              &bull; <b>Numeric nulls:</b> Keep / Drop / Fill Mean or Median<br />
+              &bull; <b>Text nulls:</b> Keep / Drop / Fill Mode or "Unknown"<br />
+              &bull; <b>Duplicates:</b> Keep all or remove exact duplicates
+            </div>
+          </div>
+          <div class="card card-purple">
+            <div class="help-card-title">PDF AI tips</div>
+            <div class="help-card-body">
+              &bull; Use text-based PDFs for best results<br />
+              &bull; Generate a summary first to understand the document<br />
+              &bull; Ask specific questions for precise answers<br />
+              &bull; The AI reads the full document — ask anything!
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-label">Account &amp; security</div>
+        <div class="faq-list">
+          <div class="guide-section">
+            <div class="guide-header" onclick="toggleGuide(this)">How do I reset my password? <span
+                class="guide-arrow">&#8964;</span></div>
+            <div class="guide-body">On the login page, click "Forgot password?" and enter your email. A reset link will
+              be sent to your inbox.</div>
+          </div>
+          <div class="guide-section">
+            <div class="guide-header" onclick="toggleGuide(this)">Is my uploaded data stored? <span
+                class="guide-arrow">&#8964;</span></div>
+            <div class="guide-body">Data is processed in memory during your session only. It is not stored permanently
+              on our servers — when you log out, all session data is cleared.</div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="info-note">Need more help? Contact the development team: <b>V. Gowtham</b> (Backend) &amp; <b>Y.
+            Balaji</b> (Frontend). Built with Sarvam AI.</div>
+      </div>
+    </div>
+
+  </div><!-- /app-wrapper -->
+
+  <script src="app.js"></script>
+</body>
+
+</html>
