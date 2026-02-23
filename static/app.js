@@ -141,149 +141,85 @@ function closeSidebar() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  FIREBASE AUTH — store & retrieve users from Firebase
-//  No email verification — users go straight to dashboard
+//  FIREBASE AUTH — Google Sign-In Only
 // ═══════════════════════════════════════════════════════════════
 
-function setSidebarUser(displayName) {
+function setSidebarUser(displayName, photoURL) {
   const av = document.getElementById("sidebar-avatar");
   const un = document.getElementById("sidebar-username");
   const tu = document.getElementById("topbar-username");
   const dw = document.getElementById("dash-welcome");
-  if (av) av.textContent = displayName.charAt(0).toUpperCase();
+  if (av) {
+    if (photoURL) {
+      av.innerHTML = `<img src="${photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt="${displayName}" />`;
+    } else {
+      av.textContent = displayName.charAt(0).toUpperCase();
+    }
+  }
   if (un) un.textContent = displayName;
   if (tu) tu.textContent = displayName;
   if (dw) dw.textContent = `Welcome back, ${displayName} 👋`;
 }
 
-// Firebase auto-restores the session on page load
+// Firebase auto-restores the Google session on page reload
 auth.onAuthStateChanged(user => {
   if (user) {
     state.user = user;
     if (!state.sessionStart) state.sessionStart = new Date();
     const displayName = user.displayName || user.email.split("@")[0];
-    setSidebarUser(displayName);
+    setSidebarUser(displayName, user.photoURL);
+    // If user lands on login/landing page while already signed in, go to dashboard
+    const activePage = document.querySelector(".page.active");
+    if (activePage && (activePage.id === "page-login" || activePage.id === "page-landing")) {
+      showPage("dashboard");
+    }
   } else {
     state.user = null;
   }
 });
 
-async function handleLogin(e) {
-  e.preventDefault();
-  const email = document.getElementById("login-email").value.trim();
-  const password = document.getElementById("login-password").value;
+// ── Google Sign-In ──────────────────────────────────────────────
+async function handleGoogleSignIn() {
+  const btn = document.getElementById("google-signin-btn");
   const errEl = document.getElementById("login-error");
-  const btn = document.getElementById("login-btn");
 
   errEl.classList.remove("visible");
   btn.disabled = true;
-  btn.textContent = "Signing in…";
+  btn.querySelector("span").textContent = "Signing in…";
 
   try {
-    const cred = await auth.signInWithEmailAndPassword(email, password);
-    const displayName = cred.user.displayName || cred.user.email.split("@")[0];
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    const result = await auth.signInWithPopup(provider);
+    const user = result.user;
+
+    // Extract name from Google profile
+    const displayName = user.displayName || user.email.split("@")[0];
+    state.user = user;
     state.sessionStart = new Date();
-    setSidebarUser(displayName);
-    toast("Welcome back, " + displayName + "! 🎉", "success");
+    setSidebarUser(displayName, user.photoURL);
+
+    toast("Welcome, " + displayName + "! 🎉", "success");
     showPage("dashboard");
   } catch (err) {
-    errEl.textContent = firebaseErrorMsg(err);
-    errEl.classList.add("visible");
+    console.error("Google Sign-In error:", err.code, err.message);
+    if (err.code === "auth/popup-closed-by-user") {
+      // User closed the popup — no error shown
+    } else if (err.code === "auth/popup-blocked") {
+      errEl.textContent = "Popup was blocked by your browser. Please allow popups for this site.";
+      errEl.classList.add("visible");
+    } else {
+      errEl.textContent = err.message;
+      errEl.classList.add("visible");
+    }
   } finally {
     btn.disabled = false;
-    btn.innerHTML = "🚀&nbsp; Sign In";
+    btn.querySelector("span").textContent = "Continue with Google";
   }
 }
 
-async function handleSignup(e) {
-  e.preventDefault();
-  const name = document.getElementById("signup-name").value.trim();
-  const email = document.getElementById("signup-email").value.trim();
-  const password = document.getElementById("signup-password").value;
-  const confirm = document.getElementById("signup-confirm").value;
-  const errEl = document.getElementById("signup-error");
-  const btn = document.getElementById("signup-btn");
-
-  errEl.classList.remove("visible");
-
-  if (password !== confirm) {
-    errEl.textContent = "Passwords do not match.";
-    errEl.classList.add("visible"); return;
-  }
-  if (password.length < 6) {
-    errEl.textContent = "Password must be at least 6 characters.";
-    errEl.classList.add("visible"); return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = "Creating account…";
-
-  try {
-    // Creates user in Firebase — stored & retrievable from Firebase Auth
-    const cred = await auth.createUserWithEmailAndPassword(email, password);
-    await cred.user.updateProfile({ displayName: name });
-    // No email verification — go straight to dashboard
-    state.sessionStart = new Date();
-    setSidebarUser(name);
-    toast("Account created! Welcome, " + name + " 🎉", "success");
-    showPage("dashboard");
-  } catch (err) {
-    errEl.textContent = firebaseErrorMsg(err);
-    errEl.classList.add("visible");
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = "📝&nbsp; Create Account";
-  }
-}
-
-async function handleForgotPassword(e) {
-  e.preventDefault();
-  const email = document.getElementById("forgot-email").value.trim();
-  const errEl = document.getElementById("forgot-error");
-  const successEl = document.getElementById("forgot-success");
-  const btn = document.getElementById("forgot-btn");
-
-  errEl.classList.remove("visible");
-  successEl.classList.remove("visible");
-  btn.disabled = true; btn.textContent = "Sending…";
-
-  try {
-    await auth.sendPasswordResetEmail(email);
-    successEl.textContent = "✅ Password reset email sent to " + email + "! Check your inbox.";
-    successEl.classList.add("visible");
-    toast("Reset email sent 📧", "success");
-  } catch (err) {
-    errEl.textContent = firebaseErrorMsg(err);
-    errEl.classList.add("visible");
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = "📨&nbsp; Send Reset Link";
-  }
-}
-
-// ── Password Strength Checker ──
-function checkPasswordStrength(password) {
-  const bar = document.getElementById("pwd-strength-bar");
-  const fill = document.getElementById("pwd-strength-fill");
-  const label = document.getElementById("pwd-strength-label");
-  if (!bar) return;
-
-  bar.style.display = password.length > 0 ? "block" : "none";
-  let strength = 0;
-  if (password.length >= 6) strength++;
-  if (password.length >= 10) strength++;
-  if (/[A-Z]/.test(password)) strength++;
-  if (/[0-9]/.test(password)) strength++;
-  if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-  const colors = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#16a34a"];
-  const labels = ["Very weak", "Weak", "Fair", "Strong", "Very strong"];
-  fill.style.width = (strength * 20) + "%";
-  fill.style.background = colors[strength - 1] || "#ef4444";
-  label.textContent = strength > 0 ? labels[strength - 1] : "";
-  label.style.color = colors[strength - 1] || "#ef4444";
-}
-
+// ── Logout ──────────────────────────────────────────────────────
 async function handleLogout() {
   try {
     await fetch(`${API_BASE}/session/${state.sessionId}`, { method: "DELETE" }).catch(() => { });
@@ -294,17 +230,9 @@ async function handleLogout() {
   toast("Signed out. See you soon! 👋", "info");
 }
 
-function firebaseErrorMsg(err) {
-  const map = {
-    "auth/user-not-found": "No account found with this email.",
-    "auth/wrong-password": "Incorrect password.",
-    "auth/email-already-in-use": "Email already registered. Try signing in.",
-    "auth/weak-password": "Password must be at least 6 characters.",
-    "auth/invalid-email": "Invalid email address.",
-    "auth/too-many-requests": "Too many attempts. Please wait and try again.",
-  };
-  return map[err.code] || err.message;
-}
+
+
+
 
 // ═══════════════════════════════════════════════════════════════
 //  TOAST NOTIFICATIONS
