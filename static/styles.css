@@ -1805,6 +1805,8 @@ body {
 /* ════════════════════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════════════════ */
+
+/* Tablets & Small Laptops */
 @media (max-width: 900px) {
   .landing-nav {
     padding: 14px 24px;
@@ -1815,7 +1817,7 @@ body {
   }
 
   .main-content {
-    padding: 28px 20px 60px;
+    padding: 24px 16px 60px;
   }
 
   .hero {
@@ -1830,6 +1832,14 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quick-action-grid {
+    grid-template-columns: 1fr;
+  }
+
   .grid-2,
   .grid-3 {
     grid-template-columns: 1fr;
@@ -1838,35 +1848,159 @@ body {
   .cap-strip {
     justify-content: flex-start;
   }
+
+  .auth-card {
+    padding: 32px 24px;
+    max-width: 90%;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .topbar {
+    padding: 0 16px;
+  }
 }
 
+/* Phones */
 @media (max-width: 600px) {
+  :root {
+    --r-lg: 14px;
+    --r-xl: 20px;
+  }
+
+  body {
+    font-size: 14px;
+  }
+
   .hero h1 {
-    font-size: 32px;
+    font-size: 30px;
+  }
+
+  .hero p {
+    font-size: 15px;
+  }
+
+  .hero-cta {
+    flex-direction: column;
+    padding: 0 20px;
+  }
+
+  .btn-xl {
+    width: 100%;
   }
 
   .steps-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .stat-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   .quick-action-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   .tips-grid {
     grid-template-columns: 1fr;
   }
 
+  /* Chat UI mobile tweaks */
   .chat-msg {
-    max-width: 95%;
+    max-width: 92%;
+    padding: 10px 14px;
+    font-size: 14px;
   }
 
-  .topbar {
-    padding: 11px 16px;
+  .chat-msg.bot {
+    margin-right: 12px;
+  }
+
+  .chat-input-container {
+    padding: 10px;
+  }
+
+  .chat-input-area {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  /* Table responsiveness */
+  .data-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-sm);
+  }
+
+  table {
+    font-size: 13px;
+    min-width: 600px;
+    /* Force scroll for small text */
+  }
+
+  /* Toolbar/Topbar mobile */
+  .topbar-actions {
+    display: none;
+    /* Hide non-essential items like "Last backup" */
+  }
+
+  .topbar-right {
+    gap: 8px;
+  }
+
+  /* Auth mobile */
+  .auth-wrapper {
+    padding: 20px 16px;
+  }
+
+  .auth-card {
+    padding: 32px 20px;
+    border-radius: var(--r-md);
+  }
+
+  .auth-title {
+    font-size: 20px;
+  }
+
+  /* Tabs mobile */
+  .tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    justify-content: flex-start;
+    padding-bottom: 4px;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  /* Profile mobile */
+  .user-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stat-item {
+    text-align: left;
+    padding: 0;
+    border: none;
+  }
+}
+
+/* Fix for small height screens */
+@media (max-height: 700px) {
+  .hero {
+    padding: 40px 20px;
+  }
+
+  .hero h1 {
+    font-size: 28px;
   }
 }
