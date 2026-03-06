@@ -2,7 +2,9 @@
 gemini.py — AI Engine for SQL & PDF Analysis
 =============================================
 Uses Sarvam AI API (sarvam-m model) to:
-  1. Convert natural language queries into SQL and execute them.
+  1. Convert natural language queries into complex SQL (subqueries, CTEs,
+     JOINs, window functions, aggregations) and execute them against an
+     in-memory SQLite database.
   2. Extract text from PDFs, chunk it, and answer questions (RAG).
 """
 
@@ -118,29 +120,44 @@ def generate_sql_from_question(question: str, schema_info: dict, session_id: str
     )
     sample_json = json.dumps(schema_info["sample_rows"], indent=2, default=str)
 
-    prompt = f"""You are an expert SQL analyst. Given the following SQLite database table information,
-generate a SQL query to answer the user's question.
+    prompt = f"""You are a senior SQL data engineer with deep expertise in SQLite.
+Your task is to generate a precise SQL query to answer the user's question.
 
-TABLE NAME: {schema_info['table_name']}
-COLUMNS:
+DATABASE SCHEMA
+───────────────
+Table Name : {schema_info['table_name']}
+Columns    :
 {columns_desc}
 
 SAMPLE DATA (first 3 rows):
 {sample_json}
 
-TOTAL ROW COUNT: {schema_info['row_count']}
+TOTAL ROWS: {schema_info['row_count']}
 
 USER QUESTION: {question}
 
-IMPORTANT RULES:
-1. Return ONLY the SQL query, nothing else.
-2. Use SQLite syntax.
-3. Always use the exact table name: {schema_info['table_name']}
-4. Use exact column names as listed above.
-5. For aggregations, always use meaningful aliases with AS.
-6. Limit results to 100 rows max unless user asks for specific count.
-7. Do NOT include any markdown formatting, code blocks, or backticks.
-8. Return just the raw SQL statement.
+SQL CAPABILITIES YOU MAY USE (SQLite syntax):
+• Subqueries          — SELECT ... FROM (SELECT ...) AS sub WHERE col IN (SELECT ...)
+• CTEs (WITH clause)  — WITH cte AS (SELECT ...) SELECT * FROM cte
+• Window functions    — ROW_NUMBER(), RANK(), DENSE_RANK(), LAG(), LEAD() OVER (...)
+• Aggregations        — COUNT, SUM, AVG, MIN, MAX with GROUP BY / HAVING
+• JOINs               — INNER JOIN, LEFT JOIN on CTEs or sub-selects if needed
+• Set operations      — UNION, UNION ALL, INTERSECT, EXCEPT
+• Conditional logic   — CASE WHEN ... THEN ... ELSE ... END
+• String functions    — UPPER, LOWER, SUBSTR, TRIM, REPLACE, PRINTF
+• Date functions      — DATE(), STRFTIME(), JULIANDAY()
+• Correlated subquery — WHERE col = (SELECT MAX(col) FROM ... WHERE ...)
+• Multiple CTEs       — WITH a AS (...), b AS (...) SELECT ...
+
+RULES:
+1. Return ONLY the raw SQL query — no markdown, no code fences, no backticks.
+2. Always reference the exact table name: {schema_info['table_name']}
+3. Use exact column names from the schema above.
+4. Prefer CTEs for multi-step logic to keep queries readable.
+5. For aggregations use meaningful aliases with AS.
+6. Limit results to 100 rows unless the user specifies otherwise.
+7. If the question implies ranking or top-N, use ORDER BY + LIMIT or window functions.
+8. Never modify data — only SELECT queries are allowed.
 
 SQL QUERY:"""
 
@@ -182,22 +199,24 @@ def generate_ai_summary(question: str, sql_result: dict) -> str:
 
     results_preview = json.dumps(sql_result["results"][:20], indent=2, default=str)
 
-    prompt = f"""You are a helpful data analyst. The user asked a question and we ran a SQL query.
-Provide a clear, concise, and insightful answer based on the results.
+    prompt = f"""You are an expert data analyst. The user asked a question and a SQL query was executed.
+Analyse the results and provide a clear, insightful, and well-structured answer.
 
-USER QUESTION: {question}
-SQL QUERY EXECUTED: {sql_result['sql_query']}
-TOTAL ROWS RETURNED: {sql_result['row_count']}
+USER QUESTION  : {question}
+SQL EXECUTED   : {sql_result['sql_query']}
+TOTAL ROWS     : {sql_result['row_count']}
 
 RESULTS (first 20 rows):
 {results_preview}
 
-Provide a helpful, well-formatted summary in markdown. Include:
-1. A direct answer to the question
-2. Key insights or patterns if applicable
-3. Any notable findings
+Your response MUST be in markdown and MUST include:
+1. **Direct Answer** — Directly answer what the user asked in 1-2 sentences.
+2. **Key Findings** — Bullet-point the most important observations, trends, or values.
+3. **Query Breakdown** (only if the SQL is complex) — Briefly explain what the query does
+   (e.g. "This uses a CTE to first rank departments, then filters the top 5").
+4. **Insights / Recommendations** — Any patterns, anomalies or actionable observations.
 
-Keep it concise but informative."""
+Be concise, data-driven, and avoid repeating the raw data unnecessarily."""
 
     return _safe_generate(prompt)
 
